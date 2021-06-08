@@ -100,7 +100,7 @@ class _MainPageState extends State<MainPage> {
       body: Row(
         children: [
           Expanded(
-              flex: 1,
+              flex: 4,
               child: Container(
                 height: MediaQuery.of(context).size.height,
                 decoration: BoxDecoration(
@@ -159,7 +159,7 @@ class _MainPageState extends State<MainPage> {
                   ],
                 ),
               )),
-          DiaryListView()
+          Expanded(flex: 10, child: DiaryListView())
         ],
       ),
       floatingActionButton: FloatingActionButton(

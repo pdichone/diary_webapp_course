@@ -3,6 +3,11 @@ import 'package:diary_webapp/model/Diary.dart';
 import 'package:diary_webapp/util/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:image_picker_web_redux/image_picker_web_redux.dart';
+import 'package:mime_type/mime_type.dart';
+import 'package:path/path.dart' as Path;
+import 'dart:html' as html;
 
 class WriteDiaryDialog extends StatefulWidget {
   const WriteDiaryDialog({
@@ -24,6 +29,10 @@ class WriteDiaryDialog extends StatefulWidget {
 
 class _WriteDiaryDialogState extends State<WriteDiaryDialog> {
   var _buttonText = 'Done';
+  html.File? _cloudFile;
+  var _fileBytes;
+  Image? _imageWidget;
+
   CollectionReference diaryCollectionReference =
       FirebaseFirestore.instance.collection('diaries');
   @override
@@ -59,23 +68,57 @@ class _WriteDiaryDialogState extends State<WriteDiaryDialog> {
                             borderRadius: BorderRadius.all(Radius.circular(15)),
                             side: BorderSide(color: Colors.green, width: 1))),
                     onPressed: () {
+                      firebase_storage.FirebaseStorage fs =
+                          firebase_storage.FirebaseStorage.instance;
+                      final dateTime = DateTime.now();
+                      final path = '$dateTime';
+
                       final _fieldsNotEmpty =
                           widget._titleTextController.toString().isNotEmpty &&
                               widget._descriptionTextController.text
                                   .toString()
                                   .isNotEmpty;
+                      String? currId;
 
                       if (_fieldsNotEmpty) {
-                        diaryCollectionReference.add(Diary(
-                                title: widget._titleTextController.text,
-                                entry: widget._descriptionTextController.text,
-                                author: FirebaseAuth
-                                    .instance.currentUser!.email!
-                                    .split('@')[0],
-                                userId: FirebaseAuth.instance.currentUser!.uid,
-                                entryTime:
-                                    Timestamp.fromDate(widget.selectedDate!))
-                            .toMap());
+                        diaryCollectionReference
+                            .add(Diary(
+                                    title: widget._titleTextController.text,
+                                    entry:
+                                        widget._descriptionTextController.text,
+                                    author: FirebaseAuth
+                                        .instance.currentUser!.email!
+                                        .split('@')[0],
+                                    userId:
+                                        FirebaseAuth.instance.currentUser!.uid,
+                                    entryTime: Timestamp.fromDate(
+                                        widget.selectedDate!))
+                                .toMap())
+                            .then((value) {
+                          setState(() {
+                            currId = value.id;
+                          });
+                          return null;
+                        });
+                      }
+                      if (_fileBytes != null) {
+                        firebase_storage.SettableMetadata? metadata =
+                            firebase_storage.SettableMetadata(
+                                contentType: 'image/jpeg',
+                                customMetadata: {'picked-file-path': path});
+
+                        fs
+                            .ref()
+                            .child(
+                                'images/$path${FirebaseAuth.instance.currentUser!.uid}')
+                            .putData(_fileBytes, metadata)
+                            .then((value) {
+                          return value.ref.getDownloadURL().then((value) {
+                            diaryCollectionReference
+                                .doc(currId)
+                                .update({'photo_list': value.toString()});
+                          });
+                        });
                       }
 
                       setState(() {
@@ -104,7 +147,9 @@ class _WriteDiaryDialogState extends State<WriteDiaryDialog> {
                         IconButton(
                           splashRadius: 26,
                           icon: Icon(Icons.image_rounded),
-                          onPressed: () {},
+                          onPressed: () async {
+                            await getMultipleImageInfos();
+                          },
                         )
                       ],
                     ),
@@ -125,11 +170,7 @@ class _WriteDiaryDialogState extends State<WriteDiaryDialog> {
                                 height:
                                     (MediaQuery.of(context).size.height * 0.8) /
                                         2,
-                                child: Container(
-                                  width: 700,
-                                  color: Colors.green,
-                                  child: Text('image here'),
-                                ),
+                                child: _imageWidget,
                               ),
                               TextFormField(
                                 controller: widget._titleTextController,
@@ -155,5 +196,18 @@ class _WriteDiaryDialogState extends State<WriteDiaryDialog> {
         ),
       ),
     );
+  }
+
+  Future<void> getMultipleImageInfos() async {
+    var mediaData = await ImagePickerWeb.getImageInfo;
+    //String? mimeType = mime(Path.basename(mediaData.fileName!));
+    // html.File mediaFile =
+    //     new html.File(mediaData.data!, mediaData.fileName!, {'type': mimeType});
+
+    setState(() {
+      // _cloudFile = mediaFile;
+      _fileBytes = mediaData.data;
+      _imageWidget = Image.memory(mediaData.data!);
+    });
   }
 }

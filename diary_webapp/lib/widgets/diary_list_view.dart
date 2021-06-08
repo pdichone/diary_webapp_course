@@ -17,7 +17,7 @@ class DiaryListView extends StatelessWidget {
       stream: FirebaseFirestore.instance.collection('diaries').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return CircularProgressIndicator();
+          return LinearProgressIndicator();
         }
         var filteredList = snapshot.data!.docs.map((diary) {
           return Diary.fromDocument(diary);
@@ -45,7 +45,7 @@ class DiaryListView extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  '${formatDate(diary.entryTime!.toDate())}',
+                                  '${formatDateFromTimestamp(diary.entryTime)}',
                                   style: TextStyle(
                                       color: Colors.blueGrey,
                                       fontSize: 19,
@@ -67,7 +67,8 @@ class DiaryListView extends StatelessWidget {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text('Date...',
+                                  Text(
+                                      '•${formatDateFromTimestampHour(diary.entryTime)}',
                                       style: TextStyle(color: Colors.green)),
                                   TextButton.icon(
                                       onPressed: () {},
@@ -75,14 +76,33 @@ class DiaryListView extends StatelessWidget {
                                       label: Text('')),
                                 ],
                               ),
-                              SizedBox(
-                                height: 150,
-                                width: 200,
-                                child: Container(
-                                  color: Colors.green,
-                                ),
-                              ),
-                              Text(diary.title!)
+                              Image.network((diary.photoUrls == null)
+                                  ? 'https://picsum.photos/400/200'
+                                  : diary.photoUrls.toString()),
+                              Row(
+                                children: [
+                                  Flexible(
+                                    child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(diary.title!,
+                                                style: TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold)),
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(
+                                              diary.entry!,
+                                            ),
+                                          ),
+                                        ]),
+                                  ),
+                                ],
+                              )
                             ],
                           ),
                         ),
