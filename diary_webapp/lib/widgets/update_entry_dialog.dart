@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:diary_webapp/model/Diary.dart';
 import 'package:diary_webapp/util/utils.dart';
 import 'package:diary_webapp/widgets/delete_entry_dialog.dart';
+import 'package:diary_webapp/widgets/inner_list_card.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker_web_redux/image_picker_web_redux.dart';
 
@@ -18,6 +20,7 @@ class UpdateEntryDialog extends StatefulWidget {
     required CollectionReference linkReference,
     required TextEditingController titleTextController,
     required TextEditingController descriptionTextController,
+    required this.widget,
     this.cloudFile,
     this.fileBytes,
     this.imageWidget,
@@ -30,6 +33,7 @@ class UpdateEntryDialog extends StatefulWidget {
   final TextEditingController _titleTextController;
   final TextEditingController _descriptionTextController;
   final CollectionReference _linkReference;
+  final InnerListCard widget;
   final html.File? cloudFile;
   final fileBytes;
   final Image? imageWidget;
@@ -73,7 +77,61 @@ class _UpdateEntryDialogState extends State<UpdateEntryDialog> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.all(Radius.circular(15)),
                             side: BorderSide(color: Colors.green, width: 1))),
-                    onPressed: () {},
+                    onPressed: () {
+                      var _user = FirebaseAuth.instance.currentUser;
+                      final _fieldNotEmpty =
+                          widget._titleTextController.text.isNotEmpty &&
+                              widget._descriptionTextController.text.isNotEmpty;
+                      final diaryTitleChanged = widget.diary.title !=
+                          widget._titleTextController.text;
+                      final diaryEntryChanged = widget.diary.entry !=
+                          widget._descriptionTextController.text;
+
+                      final diaryUpdate = diaryTitleChanged ||
+                          diaryEntryChanged ||
+                          _fileBytes != null;
+
+                      firebase_storage.FirebaseStorage fs =
+                          firebase_storage.FirebaseStorage.instance;
+
+                      final dateTime = DateTime.now();
+                      final path = '$dateTime';
+
+                      if (_fieldNotEmpty && diaryUpdate) {
+                        widget._linkReference.doc(widget.diary.id).update(Diary(
+                                userId: _user!.uid,
+                                author: _user.email!.split('@')[0],
+                                title: widget._titleTextController.text,
+                                entry: widget._descriptionTextController.text,
+                                photoUrls: (widget.diary.photoUrls != null)
+                                    ? widget.diary.photoUrls.toString()
+                                    : null,
+                                entryTime: Timestamp.fromDate(DateTime.now()))
+                            .toMap());
+
+                        // only update image if it's not null
+                        if (_fileBytes != null) {
+                          firebase_storage.SettableMetadata? metadata =
+                              firebase_storage.SettableMetadata(
+                                  contentType: 'image/jpeg',
+                                  customMetadata: {'picked-file-path': path});
+
+                          fs
+                              .ref()
+                              .child('images/$path${_user.uid}')
+                              .putData(_fileBytes, metadata)
+                              .then((value) {
+                            return value.ref.getDownloadURL().then((value) {
+                              widget._linkReference
+                                  .doc(widget.diary.id!)
+                                  .update({'photo_list': value.toString()});
+                              print(value.toString());
+                            });
+                          });
+                        }
+                        Navigator.of(context).pop();
+                      }
+                    },
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text('Done'),
@@ -115,7 +173,6 @@ class _UpdateEntryDialogState extends State<UpdateEntryDialog> {
                                             widget._linkReference,
                                         diary: widget.diary);
                                   },
-                                  
                                 );
                               },
                               splashRadius: 26,

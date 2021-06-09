@@ -71,7 +71,6 @@ class _MainPageState extends State<MainPage> {
                   },
                 ),
               ),
-              //TODO: create profile
               StreamBuilder<QuerySnapshot>(
                 stream:
                     FirebaseFirestore.instance.collection('users').snapshots(),
@@ -159,9 +158,7 @@ class _MainPageState extends State<MainPage> {
                   ],
                 ),
               )),
-          Expanded(flex: 10, child: DiaryListView(
-            selectedDate: selectedDate
-          ))
+          Expanded(flex: 10, child: DiaryListView(selectedDate: selectedDate))
         ],
       ),
       floatingActionButton: FloatingActionButton(

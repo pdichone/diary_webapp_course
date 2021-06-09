@@ -129,6 +129,7 @@ class InnerListCard extends StatelessWidget {
                                             _titleTextController,
                                         descriptionTextController:
                                             _descriptionTextController,
+                                        widget: this,
                                         linkReference: bookCollectionReference,
                                       );
                                     },
