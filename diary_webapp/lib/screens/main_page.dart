@@ -1,12 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:diary_webapp/model/Diary.dart';
 import 'package:diary_webapp/model/user.dart';
+import 'package:diary_webapp/services/service.dart';
 import 'package:diary_webapp/widgets/create_profile.dart';
 import 'package:diary_webapp/widgets/diary_list_view.dart';
 import 'package:diary_webapp/widgets/write_diary_dialog.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 
 class MainPage extends StatefulWidget {
@@ -19,11 +21,16 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   String? _dropDownText;
   DateTime selectedDate = DateTime.now();
+  var userDiaryFilteredEntriesList;
+
+  // List<Diary> _listOfDiaries = [];
 
   @override
   Widget build(BuildContext context) {
     TextEditingController _titleTextController = TextEditingController();
     TextEditingController _descriptionTextController = TextEditingController();
+    var _listOfDiaries = Provider.of<List<Diary>>(context);
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.grey.shade100,
@@ -115,9 +122,20 @@ class _MainPageState extends State<MainPage> {
                         onSelectionChanged: (dateRangePickerSelection) {
                           setState(() {
                             selectedDate = dateRangePickerSelection.value;
-                          });
+                            _listOfDiaries.clear();
+                            userDiaryFilteredEntriesList = DiaryService()
+                                .getSameDateDiaries(
+                                    Timestamp.fromDate(selectedDate).toDate(),
+                                    FirebaseAuth.instance.currentUser!.uid);
 
-                          // print(dateRangePickerSelection.value.toString());
+                            userDiaryFilteredEntriesList.then((value) {
+                              for (var item in value) {
+                                setState(() {
+                                  _listOfDiaries.add(item);
+                                });
+                              }
+                            });
+                          });
                         },
                       ),
                     ),
@@ -158,7 +176,10 @@ class _MainPageState extends State<MainPage> {
                   ],
                 ),
               )),
-          Expanded(flex: 10, child: DiaryListView(selectedDate: selectedDate))
+          Expanded(
+              flex: 10,
+              child: DiaryListView(
+                  listOfDiaries: _listOfDiaries, selectedDate: selectedDate))
         ],
       ),
       floatingActionButton: FloatingActionButton(

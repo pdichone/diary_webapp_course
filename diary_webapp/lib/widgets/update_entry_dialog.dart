@@ -106,7 +106,9 @@ class _UpdateEntryDialogState extends State<UpdateEntryDialog> {
                                 photoUrls: (widget.diary.photoUrls != null)
                                     ? widget.diary.photoUrls.toString()
                                     : null,
-                                entryTime: Timestamp.fromDate(DateTime.now()))
+                                entryTime: Timestamp.fromDate(
+                                    //widget.widget.selectedDate!,
+                                    DateTime.now()))
                             .toMap());
 
                         // only update image if it's not null
