@@ -32,6 +32,7 @@ class _WriteDiaryDialogState extends State<WriteDiaryDialog> {
   html.File? _cloudFile;
   var _fileBytes;
   Image? _imageWidget;
+  String? currId;
 
   CollectionReference diaryCollectionReference =
       FirebaseFirestore.instance.collection('diaries');
@@ -78,7 +79,6 @@ class _WriteDiaryDialogState extends State<WriteDiaryDialog> {
                               widget._descriptionTextController.text
                                   .toString()
                                   .isNotEmpty;
-                      String? currId;
 
                       if (_fieldsNotEmpty) {
                         diaryCollectionReference
@@ -107,17 +107,21 @@ class _WriteDiaryDialogState extends State<WriteDiaryDialog> {
                                 contentType: 'image/jpeg',
                                 customMetadata: {'picked-file-path': path});
 
-                        fs
-                            .ref()
-                            .child(
-                                'images/$path${FirebaseAuth.instance.currentUser!.uid}')
-                            .putData(_fileBytes, metadata)
+                        Future.delayed(Duration(milliseconds: 1100))
                             .then((value) {
-                          return value.ref.getDownloadURL().then((value) {
-                            diaryCollectionReference
-                                .doc(currId)
-                                .update({'photo_list': value.toString()});
+                          fs
+                              .ref()
+                              .child(
+                                  'images/$path${FirebaseAuth.instance.currentUser!.uid}')
+                              .putData(_fileBytes, metadata)
+                              .then((value) {
+                            return value.ref.getDownloadURL().then((value) {
+                              diaryCollectionReference
+                                  .doc(currId)
+                                  .update({'photo_list': value.toString()});
+                            });
                           });
+                          return null;
                         });
                       }
 
