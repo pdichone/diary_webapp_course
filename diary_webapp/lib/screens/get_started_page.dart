@@ -35,7 +35,7 @@ class GettingStartedPage extends StatelessWidget {
                     textStyle:
                         TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
                 icon: Icon(Icons.login_rounded),
-                label: Text('Sign in to Get Started'),
+                label: Text('Get Started'),
                 onPressed: () {
                   Navigator.push(
                       context,

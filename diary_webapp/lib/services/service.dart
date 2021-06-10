@@ -62,4 +62,28 @@ class DiaryService {
       }).toList();
     });
   }
+
+  getLatestDiaries(String uid) {
+    return diaryCollectionReference
+        .where('user_id', isEqualTo: uid)
+        .orderBy('entry_time', descending: true)
+        .get()
+        .then((value) {
+      return value.docs.map((diary) {
+        return Diary.fromDocument(diary);
+      });
+    });
+  }
+
+  getEarliestDiaries(String uid) {
+    return diaryCollectionReference
+        .where('user_id', isEqualTo: uid)
+        .orderBy('entry_time', descending: false)
+        .get()
+        .then((value) {
+      return value.docs.map((diary) {
+        return Diary.fromDocument(diary);
+      });
+    });
+  }
 }

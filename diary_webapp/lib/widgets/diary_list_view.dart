@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:delayed_display/delayed_display.dart';
 import 'package:diary_webapp/model/Diary.dart';
 import 'package:diary_webapp/screens/main_page.dart';
 import 'package:diary_webapp/util/utils.dart';
@@ -44,57 +45,65 @@ class DiaryListView extends StatelessWidget {
                   itemCount: filteredDiaryList.length,
                   itemBuilder: (context, index) {
                     Diary diary = filteredDiaryList[index];
-                    
-                    return Card(
-                      elevation: 4.0,
-                      child: InnerListCard(
-                          selectedDate: this.selectedDate,
-                          diary: diary,
-                          bookCollectionReference: bookCollectionReference),
+
+                    return DelayedDisplay(
+                      delay: Duration(milliseconds: 1),
+                      fadeIn: true,
+                      child: Card(
+                        elevation: 4.0,
+                        child: InnerListCard(
+                            selectedDate: this.selectedDate,
+                            diary: diary,
+                            bookCollectionReference: bookCollectionReference),
+                      ),
                     );
                   },
                 )
               : ListView.builder(
                   itemCount: 1,
                   itemBuilder: (context, index) {
-                    return Card(
-                      elevation: 4.0,
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width * 0.30,
-                            height: MediaQuery.of(context).size.height * 0.20,
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'Safeguard your memory on ${formatDate(selectedDate)}',
-                                    style:
-                                        Theme.of(context).textTheme.bodyText2,
-                                  ),
-                                  TextButton.icon(
-                                    icon: Icon(Icons.lock_outline_sharp),
-                                    label: Text('Click to Add an Entry'),
-                                    onPressed: () {
-                                      showDialog(
-                                        context: context,
-                                        builder: (context) {
-                                          return WriteDiaryDialog(
-                                              selectedDate: selectedDate,
-                                              titleTextController:
-                                                  _titleTextController,
-                                              descriptionTextController:
-                                                  _descriptionTextController);
-                                        },
-                                      );
-                                    },
-                                  )
-                                ],
+                    return DelayedDisplay(
+                      fadeIn: true,
+                      delay: Duration(milliseconds: 2),
+                      child: Card(
+                        elevation: 4.0,
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.30,
+                              height: MediaQuery.of(context).size.height * 0.20,
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Safeguard your memory on ${formatDate(selectedDate)}',
+                                      style:
+                                          Theme.of(context).textTheme.bodyText2,
+                                    ),
+                                    TextButton.icon(
+                                      icon: Icon(Icons.lock_outline_sharp),
+                                      label: Text('Click to Add an Entry'),
+                                      onPressed: () {
+                                        showDialog(
+                                          context: context,
+                                          builder: (context) {
+                                            return WriteDiaryDialog(
+                                                selectedDate: selectedDate,
+                                                titleTextController:
+                                                    _titleTextController,
+                                                descriptionTextController:
+                                                    _descriptionTextController);
+                                          },
+                                        );
+                                      },
+                                    )
+                                  ],
+                                ),
                               ),
-                            ),
-                          )
-                        ],
+                            )
+                          ],
+                        ),
                       ),
                     );
                   },

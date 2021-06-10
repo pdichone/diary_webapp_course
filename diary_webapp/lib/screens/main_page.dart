@@ -23,13 +23,14 @@ class _MainPageState extends State<MainPage> {
   DateTime selectedDate = DateTime.now();
   var userDiaryFilteredEntriesList;
 
-  // List<Diary> _listOfDiaries = [];
-
   @override
   Widget build(BuildContext context) {
     TextEditingController _titleTextController = TextEditingController();
     TextEditingController _descriptionTextController = TextEditingController();
     var _listOfDiaries = Provider.of<List<Diary>>(context);
+    var _user = Provider.of<User?>(context);
+    var latestFilteredDiariesStream;
+    var earliestFilteredDiariesStream;
 
     return Scaffold(
       appBar: AppBar(
@@ -70,9 +71,30 @@ class _MainPageState extends State<MainPage> {
                       setState(() {
                         _dropDownText = value;
                       });
+                      _listOfDiaries.clear();
+                      latestFilteredDiariesStream =
+                          DiaryService().getLatestDiaries(_user!.uid);
+                      latestFilteredDiariesStream.then((value) {
+                        for (var item in value) {
+                          setState(() {
+                            _listOfDiaries.add(item);
+                          });
+                        }
+                      });
                     } else if (value == 'Earliest') {
                       setState(() {
                         _dropDownText = value;
+                      });
+                      _listOfDiaries.clear();
+                      earliestFilteredDiariesStream =
+                          DiaryService().getEarliestDiaries(_user!.uid);
+
+                      earliestFilteredDiariesStream.then((value) {
+                        for (var item in value) {
+                          setState(() {
+                            _listOfDiaries.add(item);
+                          });
+                        }
                       });
                     }
                   },
@@ -183,7 +205,17 @@ class _MainPageState extends State<MainPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return WriteDiaryDialog(
+                    selectedDate: selectedDate,
+                    titleTextController: _titleTextController,
+                    descriptionTextController: _descriptionTextController);
+              },
+            );
+          },
           tooltip: 'Add',
           child: Icon(
             Icons.add,
