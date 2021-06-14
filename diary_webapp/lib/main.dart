@@ -31,7 +31,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         StreamProvider(
-            create: (context) => FirebaseAuth.instance.authStateChanges(),
+            create: (context) => FirebaseAuth.instance.idTokenChanges(),
             initialData: null),
         StreamProvider<List<Diary>>(
             create: (context) => userDiaryDataStream, initialData: [])
@@ -54,9 +54,46 @@ class MyApp extends StatelessWidget {
         onUnknownRoute: (settings) => MaterialPageRoute(
           builder: (context) => PageNotFound(),
         ),
-        // home: LoginPage(),
+        home: TesterApp(),
       ),
     );
+  }
+}
+
+class TesterApp extends StatelessWidget {
+  const TesterApp({Key? key}) : super(key: key);
+
+  Widget build(BuildContext context) {
+    CollectionReference booksCollection =
+        FirebaseFirestore.instance.collection('diaries');
+    return Scaffold(
+        appBar: AppBar(
+          title: Text('Main Page'),
+        ),
+        body: Center(
+          child: StreamBuilder<QuerySnapshot>(
+            stream: booksCollection.snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
+              final bookListStream = snapshot.data!.docs.map((book) {
+                return Diary.fromDocument(book);
+              }).toList();
+              for (var item in bookListStream) {
+                print(item.entry!);
+              }
+              return ListView.builder(
+                itemCount: bookListStream.length,
+                itemBuilder: (context, index) {
+                  return Text(bookListStream[index].entry!);
+                },
+              );
+            },
+          ),
+        ));
   }
 }
 
