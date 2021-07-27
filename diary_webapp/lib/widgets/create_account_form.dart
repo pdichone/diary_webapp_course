@@ -71,7 +71,7 @@ class CreateAccountForm extends StatelessWidget {
                       .createUserWithEmailAndPassword(
                           email: email, password: _passwordTextController.text)
                       .then((value) {
-                    if (value.user != null) {
+                    if (value.user!.uid.isNotEmpty) {
                       String uid = value.user!.uid;
                       DiaryService()
                           .createUser(email.split('@')[0], context, uid)
@@ -86,7 +86,8 @@ class CreateAccountForm extends StatelessWidget {
                               ));
                         });
                       });
-                    }
+                    } else
+                      print('User not created!!!');
                   });
                 }
               },

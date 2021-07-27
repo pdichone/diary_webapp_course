@@ -19,6 +19,7 @@ class DiaryService {
 
   Future<void> createUser(
       String displayName, BuildContext context, String uid) async {
+    print('...creating user...');
     MUser user = MUser(
         avatarUrl: 'https://picsum.photos/200/300',
         displayName: displayName,
