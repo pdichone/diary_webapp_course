@@ -28,7 +28,7 @@ dependencies:
   delayed_display: ^2.0.0
   firebase: ^9.0.1
   firebase_auth: ^1.3.0
-  firebase_core: ^1.2.1
+  firebase_core: ^1.10.0
   firebase_storage: ^8.1.1
   image_picker_web_redux: ^2.0.1
   intl: ^0.17.0

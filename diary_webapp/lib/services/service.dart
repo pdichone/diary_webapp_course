@@ -5,6 +5,9 @@ import 'package:firebase/firebase.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../model/Diary.dart';
+import '../model/user.dart';
+
 class DiaryService {
   final CollectionReference userCollectionReference =
       FirebaseFirestore.instance.collection('users');
@@ -20,11 +23,22 @@ class DiaryService {
   Future<void> createUser(
       String displayName, BuildContext context, String uid) async {
     print('...creating user...');
+    var u = {
+      'avatarUrl': 'https://picsum.photos/200/300',
+      'uid': uid,
+      'display_name': displayName,
+    };
+
+    //  'uid': uid,
+    //   'display_name': displayName,
+    //   'profession': profession,
+    //   'avatar_url': avatarUrl
+
     MUser user = MUser(
         avatarUrl: 'https://picsum.photos/200/300',
         displayName: displayName,
         uid: uid);
-    userCollectionReference.add(user.toMap());
+    userCollectionReference.add(u); //user.toMap()
     return;
   }
 

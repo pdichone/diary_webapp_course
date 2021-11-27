@@ -11,13 +11,16 @@ import 'package:provider/provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  //await Firebase.initializeApp();
+  /**
+   *  A new way to initialize firebase: https://stackoverflow.com/questions/69077745/how-to-migrate-flutter-project-to-firebase-version-9-modern-web-modular-style
+   */
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
-
+  final Future<FirebaseApp> _initialization = Firebase.initializeApp();
   final userDiaryDataStream =
       FirebaseFirestore.instance.collection('diaries').snapshots()
           // ignore: top_level_function_literal_block
@@ -28,35 +31,45 @@ class MyApp extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        StreamProvider(
-            create: (context) => FirebaseAuth.instance.idTokenChanges(),
-            initialData: null),
-        StreamProvider<List<Diary>>(
-            create: (context) => userDiaryDataStream, initialData: [])
-      ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Diary Book',
-        theme: ThemeData(
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-          primarySwatch: Colors.green,
-        ),
-        initialRoute: '/',
-        onGenerateRoute: (settings) {
-          return MaterialPageRoute(
-            builder: (context) {
-              return RouteController(settingsName: settings.name!);
-            },
-          );
-        },
-        onUnknownRoute: (settings) => MaterialPageRoute(
-          builder: (context) => PageNotFound(),
-        ),
-        //home: TesterApp(),
-      ),
-    );
+    return FutureBuilder(
+        future: _initialization,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            print("Error");
+          }
+          if (snapshot.connectionState == ConnectionState.done) {
+            return MultiProvider(
+              providers: [
+                StreamProvider(
+                    create: (context) => FirebaseAuth.instance.idTokenChanges(),
+                    initialData: null),
+                StreamProvider<List<Diary>>(
+                    create: (context) => userDiaryDataStream, initialData: [])
+              ],
+              child: MaterialApp(
+                debugShowCheckedModeBanner: false,
+                title: 'Diary Book',
+                theme: ThemeData(
+                  visualDensity: VisualDensity.adaptivePlatformDensity,
+                  primarySwatch: Colors.green,
+                ),
+                initialRoute: '/',
+                onGenerateRoute: (settings) {
+                  return MaterialPageRoute(
+                    builder: (context) {
+                      return RouteController(settingsName: settings.name!);
+                    },
+                  );
+                },
+                onUnknownRoute: (settings) => MaterialPageRoute(
+                  builder: (context) => PageNotFound(),
+                ),
+                //home: TesterApp(),
+              ),
+            );
+          }
+          return CircularProgressIndicator();
+        });
   }
 }
 
