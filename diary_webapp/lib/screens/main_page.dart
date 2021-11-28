@@ -108,23 +108,21 @@ class _MainPageState extends State<MainPage> {
                     return CircularProgressIndicator();
                   }
 
-                 // print("MUser: ${snapshot.data!.docs.toList()}");
-
+                  // print("MUser: ${snapshot.data!.docs.toList()}");
 
                   final usersListStream = snapshot.data!.docs.map((docs) {
                     return MUser.fromDocument(docs);
                   }).where((muser) {
-                    print("MUser: ${muser.uid}");
+                    // print("MUser: ${muser.uid}");
                     return (muser.uid ==
                         FirebaseAuth.instance.currentUser!.uid);
                   }).toList();
                   // print(
                   //     "CurrUser--->  ${FirebaseAuth.instance.currentUser!.uid}");
-                  
+
                   //   print("List---> ${usersListStream.length}");
-                    MUser curUser = usersListStream[0];
-                    return CreateProfile(curUser: curUser);
-              
+                  MUser curUser = usersListStream[0];
+                  return CreateProfile(curUser: curUser);
                 },
               ),
             ],

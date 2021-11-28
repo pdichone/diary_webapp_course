@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:diary_webapp/model/user.dart';
 import 'package:diary_webapp/screens/main_page.dart';
 import 'package:diary_webapp/services/service.dart';
 import 'package:diary_webapp/widgets/input_decorator.dart';

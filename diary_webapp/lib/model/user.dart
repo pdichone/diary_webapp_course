@@ -9,19 +9,14 @@ class MUser {
 
   MUser({this.id, this.uid, this.displayName, this.profession, this.avatarUrl});
 
-  factory MUser.fromDocument(QueryDocumentSnapshot data) {
+  factory MUser.fromDocument(DocumentSnapshot data) {
     return MUser(
         id: data.id,
-        uid: data['uid'],
-        displayName: data['display_name'],
-        profession: data['profession'],
-        avatarUrl: data['avatar_url']
-        // uid: data.get('uid'),
-        // displayName: data.get('display_name'),
-        // profession: data.get('profession'),
-        // avatarUrl: data.get('avatar_url')
-
-        );
+  
+        uid: data.get('uid'),
+        displayName: data.get('display_name'),
+        profession: data.get('profession'),
+        avatarUrl: data.get('avatar_url'));
   }
 
   Map<String, dynamic> toMap() {

@@ -24,21 +24,17 @@ class DiaryService {
       String displayName, BuildContext context, String uid) async {
     print('...creating user...');
     var u = {
-      'avatarUrl': 'https://picsum.photos/200/300',
+      'avatar_url': 'https://picsum.photos/200/300',
       'uid': uid,
       'display_name': displayName,
     };
 
-    //  'uid': uid,
-    //   'display_name': displayName,
-    //   'profession': profession,
-    //   'avatar_url': avatarUrl
 
     MUser user = MUser(
         avatarUrl: 'https://picsum.photos/200/300',
         displayName: displayName,
         uid: uid);
-    userCollectionReference.add(u); //user.toMap()
+    userCollectionReference.add(user.toMap());
     return;
   }
 
@@ -47,7 +43,10 @@ class DiaryService {
     MUser updateUser =
         MUser(displayName: displayName, avatarUrl: avatarUrl, uid: user.uid);
 
-    userCollectionReference.doc(user.id).update(updateUser.toMap());
+    userCollectionReference
+        .doc(user.id)
+        .update(updateUser.toMap())
+        .onError((error, stackTrace) => print(error.toString()));
     return;
   }
 

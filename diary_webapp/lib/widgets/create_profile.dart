@@ -1,6 +1,5 @@
 import 'package:diary_webapp/model/user.dart';
 import 'package:diary_webapp/screens/login_page.dart';
-import 'package:diary_webapp/services/service.dart';
 import 'package:diary_webapp/widgets/update_user_profile_dialog.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
